@@ -28,7 +28,8 @@ public class InterceptNetworkRequests {
         System.out.println(route.request().url());
         route.resume();
       });
-      page.navigate("http://todomvc.com");
+      // page.navigate("http://todomvc.com");
+      page.navigate("http://192.168.30.1:3000/");
     }
   }
 }

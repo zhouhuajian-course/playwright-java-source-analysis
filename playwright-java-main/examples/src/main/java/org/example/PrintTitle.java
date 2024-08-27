@@ -21,9 +21,11 @@ import com.microsoft.playwright.*;
 public class PrintTitle {
   public static void main(String[] args) {
     try (Playwright playwright = Playwright.create()) {
-      Browser browser = playwright.chromium().launch();
+      Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
       Page page = browser.newPage();
-      page.navigate("http://playwright.dev");
+      page.navigate("http://playwright.dev/java");
+      page.navigate("https://baidu.com/");
+      page.waitForTimeout(50000);
       System.out.println(page.title());
     }
   }
