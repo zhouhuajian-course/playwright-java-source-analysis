@@ -1,0 +1,36 @@
+name: Verify API
+on:
+  push:
+    branches:
+      - main
+      - release-*
+    paths:
+      - 'scripts/*'
+      - 'api-generator/*'
+  pull_request:
+    branches:
+      - main
+      - release-*
+    paths:
+      - 'scripts/**'
+      - 'api-generator/**'
+jobs:
+  verify:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/playwright-github-action@v1
+      - name: Download drivers
+        run: scripts/download_driver.sh
+      - name: Regenerate APIs
+        run: scripts/generate_api.sh
+      - name: Update browser versions in README
+        run: scripts/update_readme.sh
+      - name: Verify API is up to date
+        run: |
+          if [[ -n $(git status -s) ]]; then
+            echo "ERROR: generated interfaces/docs differ from the current sources:"
+            git diff
+            exit 1
+          fi
