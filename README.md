@@ -10,3 +10,7 @@
 ![](img/img_1.png)
 ![](img/img_2.png)
 ![](img/img_3.png)
+4. 安装浏览器位置 `PLAYWRIGHT_BROWSERS_PATH` 在 playwright-java 源码没看到使用的地方，在 node 代码可以看到
+![](img/img_4.png)
+![](img/img_5.png)
+![](img/img_6.png)
