@@ -137,3 +137,15 @@ Container                  :
 ```
 
 9. 创建浏览器上下文 最终是调用 Chrome DevTools Protocol 来创建浏览器上下文 `https://chromedevtools.github.io/devtools-protocol/tot/Target/#method-createBrowserContext`
+10. 创建页面截图 最终是调用 Chrome DevTools Protocol `https://chromedevtools.github.io/devtools-protocol/tot/Page/#type-Screenshot` 
+    `JsonObject json = sendMessage("screenshot", params).getAsJsonObject();` 调用 Node 程序，返回图片的内容
+    `{"binary":"iVBORw0KGgoA..."}` 然后保存，path不会传给 Node 程序，只传图片类型 `{"type":"png"}`，这说明 截图 保存是由 Java 代码实现，截图是由 Node 程序调 CDP 接口实现
+```javascript
+// https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-captureScreenshot
+const result = await this._mainFrameSession._client.send('Page.captureScreenshot', {
+      format,
+      quality,
+      clip,
+      captureBeyondViewport: !fitsViewport
+    }); 
+```
