@@ -510,6 +510,9 @@ public interface Browser extends AutoCloseable {
     /**
      * Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make sure
      * to call {@link com.microsoft.playwright.BrowserContext#close BrowserContext.close()} for videos to be saved.
+     *
+     * <p> 为所有页面开启视频录制 录制到特定目录 如果没有特定的视频被录制，请确保
+     * 调用 {@link BrowserContext#close BrowserContext.close()} 让视频能够被保存
      */
     public NewContextOptions setRecordVideoDir(Path recordVideoDir) {
       this.recordVideoDir = recordVideoDir;

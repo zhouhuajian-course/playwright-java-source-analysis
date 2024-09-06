@@ -186,14 +186,21 @@ class BrowserImpl extends ChannelOwner implements Browser {
     if (recordHar != null) {
       params.add("recordHar", recordHar);
     }
+    // 如果 记录视频目录 不为空
     if (options.recordVideoDir != null) {
+      // Json 对象
       JsonObject recordVideo = new JsonObject();
+      // 添加属性 dir -> 目录的绝对路径
       recordVideo.addProperty("dir", options.recordVideoDir.toAbsolutePath().toString());
+      // 录制视频大小
       if (options.recordVideoSize != null) {
+        // 添加 size
         recordVideo.add("size", gson().toJsonTree(options.recordVideoSize));
       }
+      // 移除 recordVideoDir recordVideoSize
       params.remove("recordVideoDir");
       params.remove("recordVideoSize");
+      // 添加 recordVideo
       params.add("recordVideo", recordVideo);
     } else if (options.recordVideoSize != null) {
       throw new PlaywrightException("recordVideoSize is set but recordVideoDir is null");
@@ -213,9 +220,12 @@ class BrowserImpl extends ChannelOwner implements Browser {
     if (options.acceptDownloads != null) {
       params.addProperty("acceptDownloads", options.acceptDownloads ? "accept" : "deny");
     }
+    // 发送消息 给 driver 创建新上下文
     JsonElement result = sendMessage("newContext", params);
     BrowserContextImpl context = connection.getExistingObject(result.getAsJsonObject().getAsJsonObject("context").get("guid").getAsString());
+    // 视频目录
     context.videosDir = options.recordVideoDir;
+    // 基础URL
     if (options.baseURL != null) {
       context.setBaseUrl(options.baseURL);
     }

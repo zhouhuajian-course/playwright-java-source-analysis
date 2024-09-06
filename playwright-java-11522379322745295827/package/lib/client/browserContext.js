@@ -495,6 +495,7 @@ function prepareRecordHarOptions(options) {
     mode: options.mode
   };
 }
+// 准备浏览器上下文参数
 async function prepareBrowserContextParams(options) {
   if (options.videoSize && !options.videosPath) throw new Error(`"videoSize" option requires "videosPath" to be specified`);
   if (options.extraHTTPHeaders) network.validateHeaders(options.extraHTTPHeaders);
@@ -512,13 +513,17 @@ async function prepareBrowserContextParams(options) {
     acceptDownloads: toAcceptDownloadsProtocol(options.acceptDownloads),
     clientCertificates: await toClientCertificatesProtocol(options.clientCertificates)
   };
+  
   if (!contextParams.recordVideo && options.videosPath) {
     contextParams.recordVideo = {
       dir: options.videosPath,
       size: options.videoSize
     };
   }
-  if (contextParams.recordVideo && contextParams.recordVideo.dir) contextParams.recordVideo.dir = _path.default.resolve(process.cwd(), contextParams.recordVideo.dir);
+  // {"recordVideo":{"dir":"C:\\Users\\zhouhuajian\\Desktop\\demo\\videos"}}
+  // 如果有 recordVide 和 recordVideo.dir 满足条件
+  if (contextParams.recordVideo && contextParams.recordVideo.dir) 
+    contextParams.recordVideo.dir = _path.default.resolve(process.cwd(), contextParams.recordVideo.dir);
   return contextParams;
 }
 function toAcceptDownloadsProtocol(acceptDownloads) {

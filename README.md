@@ -97,3 +97,43 @@ Container                  :
 6. 源码中有 driver 的概念，其实就是 `node.exe package/cli.js run-driver` 启动的进程
 
 ![](img/img_11.png)
+
+7. 默认 `viewport` 在 `package\lib\server\browserContext.js`
+
+```javascript
+// viewport 选项 默认 1280, 720
+  if (!options.viewport && !options.noDefaultViewport) options.viewport = {
+    width: 1280,
+    height: 720
+  };
+```
+
+8. 录制视频的默认视频大小 在 `package\lib\server\browserContext.js`  
+   默认大小是 800 450 （scale -> 800/1280 scale*720 -> 450）
+   
+
+```javascript
+// 录制视频的视频大小
+  if (options.recordVideo) {
+    if (!options.recordVideo.size) {
+      if (options.noDefaultViewport) {
+        options.recordVideo.size = {
+          width: 800,
+          height: 600
+        };
+      } else {
+        const size = options.viewport;
+        const scale = Math.min(1, 800 / Math.max(size.width, size.height));
+        options.recordVideo.size = {
+          width: Math.floor(size.width * scale),
+          height: Math.floor(size.height * scale)
+        };
+      }
+    }
+    // Make sure both dimensions are odd, this is required for vp8
+    options.recordVideo.size.width &= ~1;
+    options.recordVideo.size.height &= ~1;
+  }
+```
+
+9. 创建浏览器上下文 最终是调用 Chrome DevTools Protocol 来创建浏览器上下文 `https://chromedevtools.github.io/devtools-protocol/tot/Target/#method-createBrowserContext`

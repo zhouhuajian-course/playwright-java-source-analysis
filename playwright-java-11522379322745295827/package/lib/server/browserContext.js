@@ -585,6 +585,7 @@ async function createClientCertificatesProxyIfNeeded(options, browserOptions) {
   options.ignoreHTTPSErrors = true;
   return clientCertificatesProxy;
 }
+// 验证浏览器上下文选项
 function validateBrowserContextOptions(options, browserOptions) {
   if (options.noDefaultViewport && options.deviceScaleFactor !== undefined) throw new Error(`"deviceScaleFactor" option is not supported with null "viewport"`);
   if (options.noDefaultViewport && !!options.isMobile) throw new Error(`"isMobile" option is not supported with null "viewport"`);
@@ -593,10 +594,12 @@ function validateBrowserContextOptions(options, browserOptions) {
   // https://github.com/electron/electron/pull/41718 to be widely shipped.
   // In 6-12 months, we can remove this check.
   else if (options.acceptDownloads === undefined && browserOptions.name === 'electron') options.acceptDownloads = 'internal-browser-default';
+  // viewport 选项 默认 1280, 720
   if (!options.viewport && !options.noDefaultViewport) options.viewport = {
     width: 1280,
     height: 720
   };
+  // 录制视频的视频大小
   if (options.recordVideo) {
     if (!options.recordVideo.size) {
       if (options.noDefaultViewport) {
