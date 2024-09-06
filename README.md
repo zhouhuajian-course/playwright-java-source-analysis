@@ -169,6 +169,26 @@ const result = await this._mainFrameSession._client.send('Page.captureScreenshot
 ```
 
 11. 视频录制的核心源码 （已证实） `package\lib\server\chromium\videoRecorder.js` 用的是 ffmpeg 录制
+
+```javascript
+// 使用 Node Playwright 调试
+const { chromium } = require('playwright');
+
+(async() => {
+  const browser = await chromium.launch({headless: false})
+  const context = await browser.newContext({recordVideo: { dir: "videos" }})
+  const page = await context.newPage()
+  await page.goto('http://localhost/article/add')
+  
+  await page.waitForTimeout(5000)
+
+  await page.close()
+  await context.close()
+  await browser.close()
+})();
+
+```
+
 ```javascript
 async _launch(options) {
    
@@ -210,3 +230,7 @@ async _launch(options) {
 ![](img/img_13.png)
 
 ![](img/img_14.png)
+
+![](img/img_15.png)
+
+貌似是 启动 ffmpeg，然后再不断地主动写视频 frame，原理比较复杂
