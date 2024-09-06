@@ -140,6 +140,24 @@ Container                  :
 10. 创建页面截图 最终是调用 Chrome DevTools Protocol `https://chromedevtools.github.io/devtools-protocol/tot/Page/#type-Screenshot` 
     `JsonObject json = sendMessage("screenshot", params).getAsJsonObject();` 调用 Node 程序，返回图片的内容
     `{"binary":"iVBORw0KGgoA..."}` 然后保存，path不会传给 Node 程序，只传图片类型 `{"type":"png"}`，这说明 截图 保存是由 Java 代码实现，截图是由 Node 程序调 CDP 接口实现
+    已证实，由 `playwright-java-11522379322745295827/package/lib/server/chromium/crPage.js` 创建，使用 node playwright 来调试
+```javascript
+const { chromium } = require('playwright');
+
+(async() => {
+  const browser = await chromium.launch({headless: false})
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  await page.goto('http://localhost/article/add')
+  await page.screenshot({ path: 'demo.png' })
+  await page.waitForTimeout(3000)
+  await page.close()
+  await context.close()
+  await browser.close()
+})(); 
+```
+
+
 ```javascript
 // https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-captureScreenshot
 const result = await this._mainFrameSession._client.send('Page.captureScreenshot', {
@@ -149,3 +167,46 @@ const result = await this._mainFrameSession._client.send('Page.captureScreenshot
       captureBeyondViewport: !fitsViewport
     }); 
 ```
+
+11. 视频录制的核心源码 （已证实） `package\lib\server\chromium\videoRecorder.js` 用的是 ffmpeg 录制
+```javascript
+async _launch(options) {
+   
+    const w = options.width;
+    const h = options.height;
+    const args = `-loglevel error -f image2pipe -avioflags direct -fpsprobesize 0 -probesize 32 -analyzeduration 0 -c:v mjpeg -i - -y -an -r ${fps} -c:v vp8 -qmin 0 -qmax 50 -crf 8 -deadline realtime -speed 8 -b:v 1M -threads 1 -vf pad=${w}:${h}:0:0:gray,crop=${w}:${h}:0:0`.split(' ');
+    args.push(options.outputFile);
+    const progress = this._progress;
+    const {
+      launchedProcess,
+      gracefullyClose
+    } = await (0, _processLauncher.launchProcess)({
+      command: this._ffmpegPath,
+      args,
+      stdio: 'stdin',
+      log: message => progress.log(message),
+      tempDirectories: [],
+      attemptToGracefullyClose: async () => {
+        progress.log('Closing stdin...');
+        launchedProcess.stdin.end();
+      },
+      onExit: (exitCode, signal) => {
+        progress.log(`ffmpeg onkill exitCode=${exitCode} signal=${signal}`);
+      }
+    });
+    launchedProcess.stdin.on('finish', () => {
+      progress.log('ffmpeg finished input.');
+    });
+    launchedProcess.stdin.on('error', () => {
+      progress.log('ffmpeg error.');
+    });
+    this._process = launchedProcess;
+    this._gracefullyClose = gracefullyClose;
+  }
+```
+
+![](img/img_12.png)
+
+![](img/img_13.png)
+
+![](img/img_14.png)
